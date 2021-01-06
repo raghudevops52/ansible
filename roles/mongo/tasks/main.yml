@@ -1,0 +1,42 @@
+- name: Create MongoDB repo
+  copy:
+    src: mongo.repo
+    dest: /etc/yum.repos.d/mongo.repo
+
+- name: Install MongoDB
+  yum:
+    name: mongodb-org
+    state: present
+
+- name: Update MongoDB Configuration - Update Network Address
+  replace:
+    path: /etc/mongod.conf
+    regexp: '127.0.0.1'
+    replace: '0.0.0.0'
+
+- name: Start MongoDB Service
+  systemd:
+    name: mongod
+    state: started
+    enabled: yes
+
+- name: Download Azure Artifacts
+  include_role:
+    name: common
+    tasks_from: azure-artifacts
+  vars:
+    ARTIFACT_PATH: /tmp/mongo
+    COMPONENT: mongo
+    COMPONENT_ID: ced4b77b-25ef-479b-81c6-03f8d2d4b0a0
+    type: database
+
+- name: Load Schema
+  shell: mongo < /tmp/mongo/{{item}}.js
+  loop:
+    - catalogue
+    - users
+
+- name: Install Prometheus
+  include_role:
+    name: prometheus
+

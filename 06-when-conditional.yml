@@ -1,0 +1,13 @@
+- name: Demo on conditions
+  hosts: all
+  tasks:
+    - name: Print
+      debug:
+        msg: Hello , DEV Environment
+      when: ENV == "DEV"
+      ## ENV is a variable and in condition we dont need to specify variable in {{ }}
+
+    - name: Print
+      debug:
+        msg: Hello , PROD Environment
+      when: ENV == "PROD"

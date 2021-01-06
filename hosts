@@ -1,0 +1,4 @@
+[NODES]
+172.31.17.242 ansible_password=DevOps321 ansible_user=centos
+[NODES:vars]
+URL=hosts-group.example.com

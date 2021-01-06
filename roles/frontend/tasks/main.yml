@@ -1,0 +1,35 @@
+- name: Install Nginx
+  yum:
+    name: nginx
+    state: latest
+
+- name: Download Azure Artifacts
+  include_role:
+    name: common
+    tasks_from: azure-artifacts
+  vars:
+    ARTIFACT_PATH: /usr/share/nginx/html
+    COMPONENT: frontend
+    COMPONENT_ID: 4697329c-7692-4c7b-b6ee-5187d13aa587
+    type: frontend
+
+- name: Update Nginx configuration
+  template:
+    src: roboshop.conf
+    dest: /etc/nginx/default.d/roboshop.conf
+  notify: Restart Nginx
+
+- name: Start Nginx Service
+  systemd:
+    state: started
+    name: nginx
+
+- name: Install Prometheus
+  include_role:
+    name: prometheus
+
+- name: Install Filebeat
+  include_role:
+    name: filebeat
+  vars:
+    APP_NAME: frontend

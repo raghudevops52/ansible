@@ -1,0 +1,91 @@
+- name: Copy MySQL Repo
+  template:
+    src: mysql.repo
+    dest: /etc/yum.repos.d/mysql.repo
+
+- name: Remove mariadb-libs
+  yum:
+    name: mariadb-libs
+    state: absent
+
+- name: Install MySQL Server
+  yum:
+    name: [ "mysql-community-server", "MySQL-python" ]
+    state: latest
+
+- name: Start MySQL Service
+  systemd:
+    name: mysqld
+    state: started
+    enabled: yes
+
+#    echo "show databases;" | mysql -uroot -ppassword &>>$LOG_FILE
+#    if [ $? -ne 0 ]; then
+#    sleep 30
+#    MYSQL_DEFAULT_PASSWORD=$(grep 'A temporary password' /var/log/mysqld.log | awk '{print $NF}')
+#    echo "ALTER USER 'root'@'localhost' IDENTIFIED BY 'MyPassw0Rd@1';
+#  uninstall plugin validate_password;
+#  ALTER USER 'root'@'localhost' IDENTIFIED BY 'password';" >/tmp/reset.sql
+#
+#  Print "Reset Password\t"
+#  mysql --connect-expired-password -uroot -p$MYSQL_DEFAULT_PASSWORD </tmp/reset.sql  &>>$LOG_FILE
+#  Stat_Check $?
+#  fi
+
+- name: Check MySQL Port to Check starting of the service
+  wait_for:
+    port: 3306
+    delay: 10
+
+- name: Create a dummy database to check the mysql connection with new username and password
+  mysql_db:
+    name: dummy
+    state: present
+    login_user: root
+    login_password: password
+  ignore_errors: yes
+  register: out
+
+- name: Print out
+  debug:
+    msg: "{{out}}"
+
+- name: Reset MySQL Password
+  when: out.failed
+  block:
+    - name: Grab the default password
+      shell: grep 'A temporary password' /var/log/mysqld.log | awk '{print $NF}'
+      register: DEFAULT_PASSWORD
+
+    - name: Copy MySQL sql file
+      template:
+        src: pass.sql
+        dest: /tmp
+
+    - name: Reset root password
+      shell: mysql --connect-expired-password -u root -p'{{DEFAULT_PASSWORD.stdout}}' </tmp/pass.sql
+
+- name: Download Azure Artifacts
+  include_role:
+    name: common
+    tasks_from: azure-artifacts
+  vars:
+    ARTIFACT_PATH: /tmp
+    COMPONENT: mysql
+    COMPONENT_ID: aa74b814-ec1b-4dc8-8348-7be66bfb9714
+    type: database
+
+- name: Load the schema
+  mysql_db:
+    login_user: root
+    login_password: password
+    state: import
+    name: all
+    target: /tmp/shipping.sql
+
+
+### We are hardcoding the passwords, Which is not at a good idea. We will fix this later.
+
+- name: Install Prometheus
+  include_role:
+    name: prometheus

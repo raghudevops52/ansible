@@ -1,0 +1,47 @@
+- name: Add Application user
+  user:
+    name: "{{ APP_USER }}"
+
+- name: Install Python3
+  yum:
+    name: ["python36", "gcc", "python3-devel"]
+    state: present
+
+- name: Download Azure Artifacts
+  include_role:
+    name: common
+    tasks_from: azure-artifacts
+  vars:
+    ARTIFACT_PATH: /home/{{APP_USER}}/{{component}}
+    COMPONENT: payment
+    COMPONENT_ID: 2f4ebccf-fa0b-415d-acaa-b158e593501f
+    type: application
+
+
+- name: Install Payment Dependencies
+  pip:
+    requirements: /home/{{APP_USER}}/{{component}}/requirements.txt
+    executable: pip3
+
+- name: Setup SystemD Service for Payment
+  template:
+    src: systemd.service
+    dest: /etc/systemd/system/payment.service
+
+- name: Start Payment Service
+  systemd:
+    name: payment
+    state: restarted
+    enabled: yes
+    daemon-reload: yes
+
+- name: Install Prometheus
+  include_role:
+    name: prometheus
+
+- name: Install Filebeat
+  include_role:
+    name: filebeat
+  vars:
+    APP_NAME: payment
+

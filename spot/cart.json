@@ -1,0 +1,65 @@
+{
+  "IamFleetRole": "arn:aws:iam::940505102237:role/aws-ec2-spot-fleet-tagging-role",
+  "AllocationStrategy": "capacityOptimized",
+  "TargetCapacity": 1,
+  "ValidFrom": "2020-11-10T01:52:36Z",
+  "ValidUntil": "2021-11-10T01:52:36Z",
+  "SpotPrice": "0.0416",
+  "TerminateInstancesWithExpiration": true,
+  "LaunchSpecifications": [
+    {
+      "ImageId": "ami-052ed3344670027b3",
+      "InstanceType": "t3.medium",
+      "SubnetId": "subnet-a2ab19fd, subnet-cc0bbdaa, subnet-047dc125, subnet-0672334b, subnet-ba27e28b, subnet-737a117d",
+      "BlockDeviceMappings": [
+        {
+          "DeviceName": "/dev/sda1",
+          "Ebs": {
+            "DeleteOnTermination": true,
+            "SnapshotId": "snap-00478bbd380c891ed",
+            "VolumeSize": 16,
+            "VolumeType": "gp2",
+            "Encrypted": false
+          }
+        },
+        {
+          "DeviceName": "/dev/xvdb",
+          "VirtualName": "ephemeral0"
+        },
+        {
+          "DeviceName": "/dev/xvdc",
+          "VirtualName": "ephemeral1"
+        }
+      ],
+      "SpotPrice": "0.0416",
+      "SecurityGroups": [
+        {
+          "GroupId": "sg-0b102ab3774a3615b"
+        }
+      ],
+      "TagSpecifications": [
+        {
+          "ResourceType": "instance",
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": "cart"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "Type": "request",
+  "TagSpecifications": [
+    {
+      "ResourceType": "spot-fleet-request",
+      "Tags": [
+        {
+          "Key": "Name",
+          "Value": "cart"
+        }
+      ]
+    }
+  ]
+}

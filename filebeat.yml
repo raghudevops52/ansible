@@ -1,0 +1,13 @@
+- name: Roboshop Playbook Filebeat
+  hosts: all
+  become: yes
+  vars:
+    APP_USER: roboshop
+    DOMAIN: devopsb52.internal
+  tasks:
+    - name: Import Filebeat Role
+      import_role:
+        name: filebeat
+      when: component == "payment"
+      tags:
+        - payment

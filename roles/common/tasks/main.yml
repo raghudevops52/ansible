@@ -1,0 +1,15 @@
+- name: Setup Hostname
+  shell: set-hostname {{component}}
+
+- name: Disable Auto-Shutdown
+  shell: disable-auto-shutdown
+
+- name: Update rsyslog configuration
+  copy:
+    src: rsyslog.conf
+    dest: /etc/rsyslog.d/roboshop.conf
+
+- name: Restart rsyslog
+  systemd:
+    name: rsyslog
+    state: restarted

@@ -1,0 +1,74 @@
+- name: Roboshop Playbook
+  hosts: all
+  become: yes
+  vars:
+    APP_USER: roboshop
+    DOMAIN: devopsb52.internal
+  tasks:
+    - name: Import Frontend Role
+      import_role:
+        name: frontend
+      when: component == "frontend"
+      tags:
+        - frontend
+    - name: Import MongoDB Role
+      import_role:
+        name: mongo
+      when: component == "mongo"
+      tags:
+        - mongo
+    - name: Import Catalogue Role
+      import_role:
+        name: catalogue
+      when: component == "catalogue"
+      tags:
+        - catalogue
+
+    - name: Import Redis Role
+      import_role:
+        name: redis
+      when: component == "redis"
+      tags:
+        - redis
+
+    - name: Import User Role
+      import_role:
+        name: user
+      when: component == "user"
+      tags:
+        - user
+
+    - name: Import Cart Role
+      import_role:
+        name: cart
+      when: component == "cart"
+      tags:
+        - cart
+
+    - name: Import MySQL Role
+      import_role:
+        name: mysql
+      when: component == "mysql"
+      tags:
+        - mysql
+
+    - name: Import Shipping Role
+      import_role:
+        name: shipping
+      when: component == "shipping"
+      tags:
+        - shipping
+
+    - name: Import RabbitMQ Role
+      import_role:
+        name: rabbitmq
+      when: component == "rabbitmq"
+      tags:
+        - rabbitmq
+
+    - name: Import Payment Role
+      import_role:
+        name: payment
+      when: component == "payment"
+      tags:
+        - payment

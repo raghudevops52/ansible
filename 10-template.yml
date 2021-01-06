@@ -1,0 +1,9 @@
+- name: Demo on template
+  hosts: localhost
+  vars:
+    URL: google.com
+  tasks:
+    - name: Copy a template
+      template:
+        src: sample.txt
+        dest: /tmp/sample.txt

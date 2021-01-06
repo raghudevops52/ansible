@@ -1,0 +1,39 @@
+- name: Install NodeJS
+  yum:
+    name: nodejs
+    state: present
+
+- name: Add Application user
+  user:
+    name: "{{ APP_USER }}"
+
+- name: Download Azure Artifacts
+  include_role:
+    name: common
+    tasks_from: azure-artifacts
+  vars:
+    ARTIFACT_PATH: /home/{{APP_USER}}/{{component}}
+    COMPONENT: cart
+    COMPONENT_ID: bb8fe680-1e3b-4cfe-a042-7ab7f9708607
+    type: application
+
+- name: Setup SystemD Service for Cart
+  template:
+    src: systemd.service
+    dest: /etc/systemd/system/cart.service
+
+- name: Start Cart Service
+  systemd:
+    name: cart
+    state: restarted
+    enabled: yes
+
+- name: Install Prometheus
+  include_role:
+    name: prometheus
+
+- name: Install Filebeat
+  include_role:
+    name: filebeat
+  vars:
+    APP_NAME: cart

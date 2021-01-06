@@ -1,0 +1,13 @@
+- name: Demo on tags
+  hosts: all
+  tasks:
+    - name: Print One
+      debug:
+        msg: One
+      tags:
+        - one
+    - name: Print Two
+      debug:
+        msg: Two
+      tags:
+        - two

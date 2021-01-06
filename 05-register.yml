@@ -1,0 +1,10 @@
+- name: Demo in Register vars
+  hosts: all
+  tasks:
+    - name: Run some command
+      shell: uptime
+      register: out
+
+    - name: Print out
+      debug:
+        msg: "{{out.stdout}}"  ## If Value is a variable then it has to be given in double quotes

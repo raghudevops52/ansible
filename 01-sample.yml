@@ -1,0 +1,16 @@
+## Any playbook starts with a list
+
+- name: Demo of Play1
+  hosts: all
+  tasks:
+    - name: Demo of Task1 in Play1
+      debug:
+        msg: Hello World
+
+- name: Demo of Play2
+  hosts: all
+  tasks:
+    - name: Demo of Task1 in Play2
+      debug:
+        msg: Hello World
+

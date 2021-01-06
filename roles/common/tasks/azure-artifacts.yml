@@ -1,0 +1,72 @@
+- name: Copy Az Repo file
+  copy:
+    src: az-cli.repo
+    dest: /etc/yum.repos.d/az-cli.repo
+
+- name: Install Azure CLi
+  yum:
+    name: ["azure-cli", "libicu"]
+    state: present
+
+- name: Install Azure DevOps Extention
+  shell: az extension add --name azure-devops
+
+- name: Configure AZ DevOps Login
+  shell: echo {{ PAT }} | az devops login
+
+- name: Grab latest version for DEV
+  block:
+    - name: Grab latest version for DEV
+      shell: curl -s https://feeds.dev.azure.com/DevOps-Batches/DevOps52/_apis/packaging/Feeds/devopsb52/Packages/{{ COMPONENT_ID }}/versions?api-version=6.1-preview.1 | jq '.value[] | .version+ " " +.views[].name' | grep Local | head -1 | xargs | awk '{print $1}'
+      register: VERSION_DEV
+    - name: Set VERSION for DEV
+      set_fact:
+        VERSION: "{{VERSION_DEV.stdout}}"
+  when: ENV == "dev"
+
+- name: Grab latest version for QA
+  block:
+    - name: Grab latest version for QA
+      shell: curl -s https://feeds.dev.azure.com/DevOps-Batches/DevOps52/_apis/packaging/Feeds/devopsb52/Packages/{{ COMPONENT_ID }}/versions?api-version=6.1-preview.1 | jq '.value[] | .version+ " " +.views[].name' | grep PreRelease | head -1 | xargs | awk '{print $1}'
+      register: VERSION_QA
+    - name: Set VERSION for QA
+      set_fact:
+        VERSION: "{{VERSION_QA.stdout}}"
+  when: ENV == "qa"
+
+- name: Grab latest version for PROD
+  block:
+    - name: Grab latest version for PROD
+      shell: curl -s https://feeds.dev.azure.com/DevOps-Batches/DevOps52/_apis/packaging/Feeds/devopsb52/Packages/{{ COMPONENT_ID }}/versions?api-version=6.1-preview.1 | jq '.value[] | .version+ " " +.views[].name' | grep Release | head -1 | xargs | awk '{print $1}'
+      register: VERSION_PROD
+    - name: Set VERSION for PROD
+      set_fact:
+        VERSION: "{{VERSION_PROD.stdout}}"
+  when: ENV == "prod"
+
+- name: Remove old artifact path
+  file:
+    path: "{{ARTIFACT_PATH}}"
+    state: absent
+
+- name: Create Artifact directory
+  file:
+    path: "{{ARTIFACT_PATH}}"
+    state: directory
+
+- name: Version to file for AMI reference
+  shell: echo {{VERSION}} >/tmp/ami-version
+
+- name: Downloading Azure Artifacts, VERSION = {{VERSION}}, ENV = {{ENV}}
+  shell: az artifacts universal download --organization "https://dev.azure.com/DevOps-Batches/" --project "f4b641c1-99db-46d1-8110-5c6c24ce2fb9" --scope project --feed "devopsb52" --name {{COMPONENT}} --version {{VERSION}} --path .
+  args:
+    chdir: "{{ARTIFACT_PATH}}"
+
+- name: Fix Artifacts Permissions
+  file:
+    path: "{{ARTIFACT_PATH}}"
+    owner: "{{APP_USER}}"
+    group: "{{APP_USER}}"
+    state: directory
+    recurse: yes
+  when: type == "application"

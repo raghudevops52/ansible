@@ -1,0 +1,8 @@
+- name: Demo on Privilege escalation
+  hosts: all
+  become: yes # It uses to run all the tasks as sudo
+  tasks:
+    - name: Create a file
+      shell: touch /root/b
+      become: yes  # We can give permission to only one task also
+

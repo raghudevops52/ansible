@@ -1,0 +1,51 @@
+filebeat.inputs:
+  - type: log
+    enabled: true
+{% if component == 'catalogue' or component == 'user' or component == 'cart' %}
+    json.keys_under_root: true
+    json.message_key: log
+{% endif %}
+    fields:
+      app_name: "{{APP_NAME}}"
+  {% if component == 'frontend' %}
+  paths:
+    - /var/log/nginx/access.log
+  {% else %}
+  paths:
+    - /var/log/{{APP_NAME}}.log
+  {% endif %}
+{% if component == 'payment' %}
+  include_lines: ["INFO in payment"]
+{% endif %}
+{% if component == 'shipping' %}
+  include_lines: ["c.instana.robotshop.shipping.Controller"]
+{% endif %}
+
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+
+setup.template.settings:
+  index.number_of_shards: 1
+
+setup.template:
+  name: "{{APP_NAME}}"
+  pattern: '{{APP_NAME}}-*'
+  enabled: false
+setup.ilm.enabled: false
+
+{% if component == 'payment' %}
+output.logstash:
+  hosts: ["{{ELASTICSEARCH}}:5044"]
+{% elif component == 'frontend' %}
+output.logstash:
+  hosts: ["{{ELASTICSEARCH}}:5044"]
+{% elif component == 'shipping' %}
+output.logstash:
+  hosts: ["{{ELASTICSEARCH}}:5044"]
+{% else %}
+output.elasticsearch:
+  hosts: ["{{ELASTICSEARCH}}:9200"]
+  index: "{{APP_NAME}}-%{+yyyy.MM.dd}"
+{% endif %}
+

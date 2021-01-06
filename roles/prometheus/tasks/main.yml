@@ -1,0 +1,33 @@
+- name: Remove old installation
+  when: OVERRIDE
+  file:
+    path: /opt/node_exporter
+    state: absent
+
+- name: Check if node_exporter is already installed
+  stat:
+    path: /opt/node_exporter
+  register: out
+
+- name: DOwnload Node_exporter
+  unarchive:
+    src: "{{URL}}"
+    dest: /opt
+    remote_src: yes
+  when: not out.stat.exists
+
+- name: Rename NodeExporter
+  shell: mv /opt/{{DOWNLOAD_DIR}} /opt/node_exporter
+  when: not out.stat.exists
+
+- name: Copy NodeExporter SystemD Configuration
+  template:
+    src: node_exporter.service
+    dest: /etc/systemd/system
+
+- name: Start Node Exporter
+  systemd:
+    name: node_exporter
+    state: started
+    enabled: yes
+

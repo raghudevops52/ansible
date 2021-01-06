@@ -1,0 +1,7 @@
+- name: Demo on RoleA
+  debug:
+    msg: Hello from RoleA
+
+- name: Variables in RoleA
+  debug:
+    msg: URL = {{ URL }}

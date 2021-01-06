@@ -1,0 +1,1 @@
+CART_ENDPOINT: cart-{{ENV}}.{{DOMAIN}}:8080

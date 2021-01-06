@@ -1,0 +1,26 @@
+- name: Setup Yum repos for Redis
+  yum:
+    name: http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+    state: present
+
+- name: Install Redis
+  yum:
+    name: redis
+    state: latest
+    enablerepo: remi
+
+- name: Update Listen Address
+  replace:
+    path: /etc/redis.conf
+    regexp: '127.0.0.1'
+    replace: '0.0.0.0'
+
+- name: Start Redis Service
+  systemd:
+    name: redis
+    state: started
+    enabled: yes
+
+- name: Install Prometheus
+  include_role:
+    name: prometheus

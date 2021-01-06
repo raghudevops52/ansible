@@ -1,0 +1,53 @@
+- name: Demo on inventory variables
+  hosts: NODES
+  gather_facts: no
+  tasks:
+    - debug:
+        msg: Hello URL = {{ URL }}
+
+- name: Demo on variables
+  hosts: NODES
+  gather_facts: no
+  vars:
+    URL: play.example.com
+  vars_prompt:
+    - prompt: Enter your name
+      name: NAME
+      private: no
+  vars_files:
+    - vars01.yml
+  tasks:
+    - name: Print a variable
+      debug:
+        msg: URL = {{ URL }}
+    - name: Print same variable
+      debug:
+        msg: URL = {{ URL }}
+      vars:
+        URL: tasks.example.com
+      # Variables can be declared on task level also
+    - name: Print Name
+      debug:
+        msg: Hello, {{ NAME }}
+
+- name: Print facts
+  hosts: NODES
+  gather_facts: yes
+  tasks:
+    - debug:
+        msg: "HOSTNAME = {{ ansible_nodename }}"
+
+#- hosts: all
+#  tasks:
+#    - debug:
+#        msg: URL = {{URL}}
+
+
+# Observation:
+# 1. Play variable can be accessed across the play
+# 2. One play variable cannot be accessed over another play by default
+# 3. Task variable have higher precedence than play variable
+
+
+## Variables Precedence Order
+#  https://docs.ansible.com/ansible/latest/user_guide/playbooks_variables.html#variable-precedence-where-should-i-put-a-variable

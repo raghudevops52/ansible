@@ -1,0 +1,24 @@
+- name: Demo on block and register variables
+  hosts: all
+  tasks:
+    - name: Block1
+      block:
+        - name: Print Uptime
+          shell: uptime
+          register: out
+        - name: Setup fact
+          set_fact:
+            OUTPUT: "{{out.stdout}}"
+      when: ENV == "dev"
+    - name: Block2
+      block:
+        - name: Print hostname
+          shell: hostname
+          register: out
+        - name: Setup fact
+          set_fact:
+            OUTPUT: "{{out.stdout}}"
+      when: ENV == "prod"
+    - name: Print out
+      debug:
+        msg: "{{OUTPUT}}"

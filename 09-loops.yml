@@ -1,0 +1,15 @@
+- name: Demo on loops
+  hosts: localhost
+  tasks:
+    - name: Print Fruit Names
+      debug:
+        msg: Fruit Name = {{ item }}
+      loop:
+        - banana
+        - orange
+    - name: Print Fruit Names and price
+      debug:
+        msg: Fruit Name = {{ item.name }}, Price = {{ item.price }}
+      loop:
+        - { name: "banana", price: "1.0$" }
+        - { name: "orange", price: "2.0$" }
